@@ -14,9 +14,9 @@ import java.util.concurrent.TimeUnit;
 public class Timer implements Metered, Stoppable, Sampling, Summarizable {
 
     private final TimeUnit durationUnit, rateUnit;
-    private final Meter meter;
-    private final Histogram histogram = new Histogram(SampleType.BIASED);
-    private final Clock clock;
+    protected Meter meter;
+    protected final Histogram histogram = new Histogram(SampleType.BIASED);
+    protected final Clock clock;
 
     /**
      * Creates a new {@link Timer}.
@@ -42,7 +42,20 @@ public class Timer implements Metered, Stoppable, Sampling, Summarizable {
         this.rateUnit = rateUnit;
         this.meter = new Meter(tickThread, "calls", rateUnit, clock);
         this.clock = clock;
-        clear();
+    }
+
+    /**
+     * Creates a new {@link Timer}.
+     *
+     * @param meter        meter for updating the rates
+     * @param durationUnit the scale unit for this timer's duration metrics
+     * @param clock        the clock used to calculate duration
+     */
+    Timer(Meter meter, TimeUnit durationUnit, Clock clock) {
+        this.durationUnit = durationUnit;
+        this.rateUnit = meter.getRateUnit();
+        this.meter = meter;
+        this.clock = clock;
     }
 
     /**
@@ -203,14 +216,14 @@ public class Timer implements Metered, Stoppable, Sampling, Summarizable {
         processor.processTimer(name, this, context);
     }
 
-    private void update(long duration) {
+    protected void update(long duration) {
         if (duration >= 0) {
             histogram.update(duration);
             meter.mark();
         }
     }
 
-    private double convertFromNS(double ns) {
+    protected double convertFromNS(double ns) {
         return ns / TimeUnit.NANOSECONDS.convert(1, durationUnit);
     }
 }
