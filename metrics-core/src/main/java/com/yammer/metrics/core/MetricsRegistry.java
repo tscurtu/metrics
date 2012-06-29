@@ -241,6 +241,55 @@ public class MetricsRegistry {
     }
 
     /**
+     * Creates a new {@link AbsoluteMeter} and registers it under the given class and name.
+     *
+     * @param klass     the class which owns the metric
+     * @param name      the name of the metric
+     * @param eventType the plural name of the type of events the meter is measuring (e.g., {@code
+     *                  "requests"})
+     * @return a new {@link AbsoluteMeter}
+     */
+    public AbsoluteMeter newAverageMeter(Class<?> klass,
+                                         String name,
+                                         String eventType) {
+        return newAverageMeter(klass, name, null, eventType);
+    }
+
+    /**
+     * Creates a new {@link AbsoluteMeter} and registers it under the given class, name, and scope.
+     *
+     * @param klass     the class which owns the metric
+     * @param name      the name of the metric
+     * @param scope     the scope of the metric
+     * @param eventType the plural name of the type of events the meter is measuring (e.g., {@code
+     *                  "requests"})
+     * @return a new {@link AbsoluteMeter}
+     */
+    public AbsoluteMeter newAverageMeter(Class<?> klass,
+                                         String name,
+                                         String scope,
+                                         String eventType) {
+        return newAverageMeter(createName(klass, name, scope), eventType);
+    }
+
+    /**
+     * Creates a new {@link AbsoluteMeter} and registers it under the given metric name.
+     *
+     * @param metricName the name of the metric
+     * @param eventType  the plural name of the type of events the meter is measuring (e.g., {@code
+     *                   "requests"})
+     * @return a new {@link AbsoluteMeter}
+     */
+    public AbsoluteMeter newAverageMeter(MetricName metricName,
+                                         String eventType) {
+        final Metric existingMetric = metrics.get(metricName);
+        if (existingMetric != null) {
+          return (AbsoluteMeter) existingMetric;
+        }
+        return getOrAdd(metricName, new AbsoluteMeter(newMeterTickThreadPool(), eventType, clock));
+    }
+
+    /**
      * Creates a new {@link Timer} and registers it under the given class and name, measuring
      * elapsed time in milliseconds and invocations per second.
      *
@@ -319,6 +368,81 @@ public class MetricsRegistry {
         }
         return getOrAdd(metricName,
                         new Timer(newMeterTickThreadPool(), durationUnit, rateUnit, clock));
+    }
+
+    /**
+     * Creates a new {@link RollingTimer} and registers it under the given class and name,
+     * measuring elapsed time in milliseconds and invocations per second.
+     *
+     * @param klass the class which owns the metric
+     * @param name  the name of the metric
+     * @return a new {@link RollingTimer}
+     */
+    public RollingTimer newRollingTimer(Class<?> klass,
+                                        String name) {
+        return newRollingTimer(klass, name, null, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Creates a new {@link RollingTimer} and registers it under the given class and name.
+     *
+     * @param klass        the class which owns the metric
+     * @param name         the name of the metric
+     * @param durationUnit the duration scale unit of the new timer
+     * @return a new {@link RollingTimer}
+     */
+    public RollingTimer newRollingTimer(Class<?> klass,
+                                        String name,
+                                        TimeUnit durationUnit) {
+        return newRollingTimer(klass, name, null, durationUnit);
+    }
+
+    /**
+     * Creates a new {@link RollingTimer} and registers it under the given class, name, and scope,
+     * measuring elapsed time in milliseconds and invocations per second.
+     *
+     * @param klass the class which owns the metric
+     * @param name  the name of the metric
+     * @param scope the scope of the metric
+     * @return a new {@link RollingTimer}
+     */
+    public RollingTimer newRollingTimer(Class<?> klass,
+                                        String name,
+                                        String scope) {
+        return newRollingTimer(klass, name, scope, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Creates a new {@link RollingTimer} and registers it under the given class, name, and scope.
+     *
+     * @param klass        the class which owns the metric
+     * @param name         the name of the metric
+     * @param scope        the scope of the metric
+     * @param durationUnit the duration scale unit of the new timer
+     * @return a new {@link RollingTimer}
+     */
+    public RollingTimer newRollingTimer(Class<?> klass,
+                                        String name,
+                                        String scope,
+                                        TimeUnit durationUnit) {
+        return newRollingTimer(createName(klass, name, scope), durationUnit);
+    }
+
+    /**
+     * Creates a new {@link RollingTimer} and registers it under the given metric name.
+     *
+     * @param metricName   the name of the metric
+     * @param durationUnit the duration scale unit of the new timer
+     * @return a new {@link RollingTimer}
+     */
+    public RollingTimer newRollingTimer(MetricName metricName,
+                                        TimeUnit durationUnit) {
+        final Metric existingMetric = metrics.get(metricName);
+        if (existingMetric != null) {
+            return (RollingTimer) existingMetric;
+        }
+        return getOrAdd(metricName,
+                        new RollingTimer(newMeterTickThreadPool(), durationUnit, clock));
     }
 
     /**
