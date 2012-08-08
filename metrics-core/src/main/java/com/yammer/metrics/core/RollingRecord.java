@@ -35,18 +35,17 @@ public class RollingRecord extends Counter {
             total.addAndGet(-eventBuckets.removeLast());
         }
         eventBuckets.addFirst(count.getAndSet(0L));
+        total.addAndGet(eventBuckets.getFirst());
     }
 
     @Override
     public void inc(long n) {
         count.addAndGet(n);
-        total.addAndGet(n);
     }
 
     @Override
     public void dec(long n) {
         count.addAndGet(-n);
-        total.addAndGet(-n);
     }
 
     @Override
