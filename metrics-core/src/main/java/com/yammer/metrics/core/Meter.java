@@ -14,13 +14,13 @@ import java.util.concurrent.atomic.AtomicLong;
  * @see <a href="http://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average">EMA</a>
  */
 public class Meter implements Metered, Stoppable {
-    private static final long INTERVAL = 5; // seconds
+    protected static final long INTERVAL = 5; // seconds
 
     private final EWMA m1Rate = EWMA.oneMinuteEWMA();
     private final EWMA m5Rate = EWMA.fiveMinuteEWMA();
     private final EWMA m15Rate = EWMA.fifteenMinuteEWMA();
 
-    private final AtomicLong count = new AtomicLong();
+    protected final AtomicLong count = new AtomicLong();
     private final long startTime;
     private final TimeUnit rateUnit;
     private final String eventType;

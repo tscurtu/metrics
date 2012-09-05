@@ -246,6 +246,54 @@ public class Metrics {
     }
 
     /**
+     * Creates a new {@link com.yammer.metrics.core.AbsoluteMeter} and registers it under the given
+     * class and name.
+     *
+     * @param klass     the class which owns the metric
+     * @param name      the name of the metric
+     * @param eventType the plural name of the type of events the meter is measuring (e.g., {@code
+     *                  "requests"})
+     * @return a new {@link com.yammer.metrics.core.AbsoluteMeter}
+     */
+    public static AbsoluteMeter newAverageMeter(Class<?> klass,
+                                                String name,
+                                                String eventType) {
+        return DEFAULT_REGISTRY.newAverageMeter(klass, name, eventType);
+    }
+
+    /**
+     * Creates a new {@link com.yammer.metrics.core.AbsoluteMeter} and registers it under the given
+     * class, name, and scope.
+     *
+     * @param klass     the class which owns the metric
+     * @param name      the name of the metric
+     * @param scope     the scope of the metric
+     * @param eventType the plural name of the type of events the meter is measuring (e.g., {@code
+     *                  "requests"})
+     * @return a new {@link com.yammer.metrics.core.AbsoluteMeter}
+     */
+    public static AbsoluteMeter newAverageMeter(Class<?> klass,
+                                                String name,
+                                                String scope,
+                                                String eventType) {
+        return DEFAULT_REGISTRY.newAverageMeter(klass, name, scope, eventType);
+    }
+
+    /**
+     * Creates a new {@link com.yammer.metrics.core.AbsoluteMeter} and registers it under the given
+     * metric name.
+     *
+     * @param metricName the name of the metric
+     * @param eventType  the plural name of the type of events the meter is measuring (e.g., {@code
+     *                   "requests"})
+     * @return a new {@link com.yammer.metrics.core.AbsoluteMeter}
+     */
+    public static AbsoluteMeter newAverageMeter(MetricName metricName,
+                                                String eventType) {
+        return DEFAULT_REGISTRY.newAverageMeter(metricName, eventType);
+    }
+
+    /**
      * Creates a new {@link com.yammer.metrics.core.Timer} and registers it under the given class
      * and name.
      *
@@ -322,6 +370,79 @@ public class Metrics {
                                  TimeUnit durationUnit,
                                  TimeUnit rateUnit) {
         return DEFAULT_REGISTRY.newTimer(metricName, durationUnit, rateUnit);
+    }
+
+    /**
+     * Creates a new {@link com.yammer.metrics.core.RollingTimer} and registers it under the given class
+     * and name.
+     *
+     * @param klass        the class which owns the metric
+     * @param name         the name of the metric
+     * @param durationUnit the duration scale unit of the new timer
+     * @return a new {@link com.yammer.metrics.core.RollingTimer}
+     */
+    public static RollingTimer newRollingTimer(Class<?> klass,
+                                               String name,
+                                               TimeUnit durationUnit) {
+        return DEFAULT_REGISTRY.newRollingTimer(klass, name, durationUnit);
+    }
+
+    /**
+     * Creates a new {@link com.yammer.metrics.core.RollingTimer} and registers it under the given class
+     * and name, measuring elapsed time in milliseconds and invocations per second.
+     *
+     * @param klass the class which owns the metric
+     * @param name  the name of the metric
+     * @return a new {@link com.yammer.metrics.core.RollingTimer}
+     */
+    public static RollingTimer newRollingTimer(Class<?> klass,
+                                               String name) {
+        return DEFAULT_REGISTRY.newRollingTimer(klass, name);
+    }
+
+    /**
+     * Creates a new {@link com.yammer.metrics.core.RollingTimer} and registers it under the given class,
+     * name, and scope.
+     *
+     * @param klass        the class which owns the metric
+     * @param name         the name of the metric
+     * @param scope        the scope of the metric
+     * @param durationUnit the duration scale unit of the new timer
+     * @return a new {@link com.yammer.metrics.core.RollingTimer}
+     */
+    public static RollingTimer newRollingTimer(Class<?> klass,
+                                               String name,
+                                               String scope,
+                                               TimeUnit durationUnit) {
+        return DEFAULT_REGISTRY.newRollingTimer(klass, name, scope, durationUnit);
+    }
+
+    /**
+     * Creates a new {@link com.yammer.metrics.core.RollingTimer} and registers it under the given class,
+     * name, and scope, measuring elapsed time in milliseconds and invocations per second.
+     *
+     * @param klass the class which owns the metric
+     * @param name  the name of the metric
+     * @param scope the scope of the metric
+     * @return a new {@link com.yammer.metrics.core.RollingTimer}
+     */
+    public static RollingTimer newRollingTimer(Class<?> klass,
+                                               String name,
+                                               String scope) {
+        return DEFAULT_REGISTRY.newRollingTimer(klass, name, scope);
+    }
+
+    /**
+     * Creates a new {@link com.yammer.metrics.core.RollingTimer} and registers it under the given metric
+     * name.
+     *
+     * @param metricName   the name of the metric
+     * @param durationUnit the duration scale unit of the new timer
+     * @return a new {@link com.yammer.metrics.core.RollingTimer}
+     */
+    public static Timer newRollingTimer(MetricName metricName,
+                                        TimeUnit durationUnit) {
+        return DEFAULT_REGISTRY.newRollingTimer(metricName, durationUnit);
     }
 
     /**
