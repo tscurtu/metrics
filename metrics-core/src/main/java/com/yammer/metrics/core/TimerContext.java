@@ -8,9 +8,9 @@ import java.util.concurrent.TimeUnit;
  * @see Timer#time()
  */
 public class TimerContext {
-    private final Timer timer;
-    private final Clock clock;
-    private final long startTime;
+    protected final Timer timer;
+    protected final Clock clock;
+    protected long startTime;
 
     /**
      * Creates a new {@link TimerContext} with the current time as its starting value and with the
@@ -26,8 +26,12 @@ public class TimerContext {
 
     /**
      * Stops recording the elapsed time and updates the timer.
+     *
+     * @return the number of nanoseconds that have elapsed from the start time
      */
-    public void stop() {
-        timer.update(clock.getTick() - startTime, TimeUnit.NANOSECONDS);
+    public long stop() {
+        long duration = clock.getTick() - startTime;
+        timer.update(duration, TimeUnit.NANOSECONDS);
+        return duration;
     }
 }

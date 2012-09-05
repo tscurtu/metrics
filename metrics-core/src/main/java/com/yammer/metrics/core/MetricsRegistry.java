@@ -442,7 +442,7 @@ public class MetricsRegistry {
             return (RollingTimer) existingMetric;
         }
         return getOrAdd(metricName,
-                        new RollingTimer(newMeterTickThreadPool(), durationUnit, clock));
+                        new RollingTimer(newMeterTickThreadPool(), metricName.getName(), durationUnit, clock));
     }
 
     /**
@@ -607,7 +607,7 @@ public class MetricsRegistry {
      * @return either the existing metric or {@code metric}
      */
     @SuppressWarnings("unchecked")
-    protected final <T extends Metric> T getOrAdd(MetricName name, T metric) {
+    public final <T extends Metric> T getOrAdd(MetricName name, T metric) {
         final Metric existingMetric = metrics.get(name);
         if (existingMetric == null) {
             final Metric justAddedMetric = metrics.putIfAbsent(name, metric);
@@ -625,7 +625,7 @@ public class MetricsRegistry {
         return (T) existingMetric;
     }
 
-    private ScheduledExecutorService newMeterTickThreadPool() {
+    ScheduledExecutorService newMeterTickThreadPool() {
         return threadPools.newScheduledThreadPool(2, "meter-tick");
     }
 

@@ -249,6 +249,19 @@ public class Metrics {
      * Creates a new {@link com.yammer.metrics.core.AbsoluteMeter} and registers it under the given
      * class and name.
      *
+     * @param klass the class which owns the metric
+     * @param name  the name of the metric
+     * @return a new {@link com.yammer.metrics.core.AbsoluteMeter}
+     */
+    public static AbsoluteMeter newAverageMeter(Class<?> klass,
+                                                String name) {
+      return DEFAULT_REGISTRY.newAverageMeter(klass, name, name);
+    }
+
+    /**
+     * Creates a new {@link com.yammer.metrics.core.AbsoluteMeter} and registers it under the given
+     * class and name.
+     *
      * @param klass     the class which owns the metric
      * @param name      the name of the metric
      * @param eventType the plural name of the type of events the meter is measuring (e.g., {@code
