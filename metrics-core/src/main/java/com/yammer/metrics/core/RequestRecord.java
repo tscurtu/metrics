@@ -23,7 +23,6 @@ public class RequestRecord implements Metric {
 
     private final Logger LOG = LoggerFactory.getLogger(this.getClass().getName());
     private final Clock clock;
-    private final RollingRecord totalRequests;
     private final RollingRecord servedRequests;
     private final RollingRecord failedRequests;
     private final RollingTimer concurrentTimer;
@@ -40,7 +39,6 @@ public class RequestRecord implements Metric {
      */
     RequestRecord(ScheduledExecutorService tickThread, String name, Clock clock) {
         this.clock = Clock.defaultClock();
-        this.totalRequests = new RollingRecord(1L, TimeUnit.MINUTES);
         this.servedRequests = new RollingRecord(1L, TimeUnit.MINUTES);
         this.failedRequests = new RollingRecord(1L, TimeUnit.MINUTES);
         this.concurrentTimer = new RollingTimer(CONCURRENT_TIMER, TimeUnit.MILLISECONDS, clock);
@@ -56,7 +54,6 @@ public class RequestRecord implements Metric {
         tickThread.scheduleAtFixedRate(new Runnable() {
               @Override
               public void run() {
-                  totalRequests.tick();
                   servedRequests.tick();
                   failedRequests.tick();
                   concurrentTimer.tick();
@@ -104,7 +101,6 @@ public class RequestRecord implements Metric {
      */
     public long markServed() {
         servedRequests.inc();
-        totalRequests.inc();
         return timerContext.get().stop(); // updates concurrentTimer
     }
 
@@ -115,7 +111,6 @@ public class RequestRecord implements Metric {
      */
     public long markFailed() {
         failedRequests.inc();
-        totalRequests.inc();
         return timerContext.get().stop(); // updates concurrentTimer
     }
 
@@ -143,7 +138,7 @@ public class RequestRecord implements Metric {
      * @return the number of total requests in the last minute
      */
     public long getLastMinuteTotalCount() {
-        return totalRequests.getCount();
+        return getLastMinuteFailedCount() + getLastMinuteServedCount();
     }
 
     /**
@@ -170,7 +165,8 @@ public class RequestRecord implements Metric {
      * @return the average handling time in the last minute
      */
     public double getLastMinuteAvgTime() {
-        return (totalRequests.getCount() == 0L) ? 0D : concurrentTimer.getOneMinuteRate() / totalRequests.getCount();
+        long totalCount = getLastMinuteTotalCount();
+        return (totalCount == 0L) ? 0D : concurrentTimer.getOneMinuteRate() / totalCount;
     }
 
     @Override
@@ -190,7 +186,7 @@ public class RequestRecord implements Metric {
         /**
          * Starts the timer.
          *
-         * @return the cock tick in nanoseconds
+         * @return the clock tick in nanoseconds
          */
         public long start() {
             return startTime = clock.getTick();
