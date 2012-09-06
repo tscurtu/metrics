@@ -249,10 +249,10 @@ public class MetricsRegistry {
      *                  "requests"})
      * @return a new {@link AbsoluteMeter}
      */
-    public AbsoluteMeter newAverageMeter(Class<?> klass,
+    public AbsoluteMeter newAbsoluteMeter(Class<?> klass,
                                          String name,
                                          String eventType) {
-        return newAverageMeter(klass, name, null, eventType);
+        return newAbsoluteMeter(klass, name, null, eventType);
     }
 
     /**
@@ -265,11 +265,11 @@ public class MetricsRegistry {
      *                  "requests"})
      * @return a new {@link AbsoluteMeter}
      */
-    public AbsoluteMeter newAverageMeter(Class<?> klass,
+    public AbsoluteMeter newAbsoluteMeter(Class<?> klass,
                                          String name,
                                          String scope,
                                          String eventType) {
-        return newAverageMeter(createName(klass, name, scope), eventType);
+        return newAbsoluteMeter(createName(klass, name, scope), eventType);
     }
 
     /**
@@ -280,7 +280,7 @@ public class MetricsRegistry {
      *                   "requests"})
      * @return a new {@link AbsoluteMeter}
      */
-    public AbsoluteMeter newAverageMeter(MetricName metricName,
+    public AbsoluteMeter newAbsoluteMeter(MetricName metricName,
                                          String eventType) {
         final Metric existingMetric = metrics.get(metricName);
         if (existingMetric != null) {

@@ -253,9 +253,9 @@ public class Metrics {
      * @param name  the name of the metric
      * @return a new {@link com.yammer.metrics.core.AbsoluteMeter}
      */
-    public static AbsoluteMeter newAverageMeter(Class<?> klass,
-                                                String name) {
-      return DEFAULT_REGISTRY.newAverageMeter(klass, name, name);
+    public static AbsoluteMeter newAbsoluteMeter(Class<?> klass,
+                                                 String name) {
+      return DEFAULT_REGISTRY.newAbsoluteMeter(klass, name, name);
     }
 
     /**
@@ -268,10 +268,10 @@ public class Metrics {
      *                  "requests"})
      * @return a new {@link com.yammer.metrics.core.AbsoluteMeter}
      */
-    public static AbsoluteMeter newAverageMeter(Class<?> klass,
-                                                String name,
-                                                String eventType) {
-        return DEFAULT_REGISTRY.newAverageMeter(klass, name, eventType);
+    public static AbsoluteMeter newAbsoluteMeter(Class<?> klass,
+                                                 String name,
+                                                 String eventType) {
+        return DEFAULT_REGISTRY.newAbsoluteMeter(klass, name, eventType);
     }
 
     /**
@@ -285,11 +285,11 @@ public class Metrics {
      *                  "requests"})
      * @return a new {@link com.yammer.metrics.core.AbsoluteMeter}
      */
-    public static AbsoluteMeter newAverageMeter(Class<?> klass,
-                                                String name,
-                                                String scope,
-                                                String eventType) {
-        return DEFAULT_REGISTRY.newAverageMeter(klass, name, scope, eventType);
+    public static AbsoluteMeter newAbsoluteMeter(Class<?> klass,
+                                                 String name,
+                                                 String scope,
+                                                 String eventType) {
+        return DEFAULT_REGISTRY.newAbsoluteMeter(klass, name, scope, eventType);
     }
 
     /**
@@ -301,9 +301,9 @@ public class Metrics {
      *                   "requests"})
      * @return a new {@link com.yammer.metrics.core.AbsoluteMeter}
      */
-    public static AbsoluteMeter newAverageMeter(MetricName metricName,
-                                                String eventType) {
-        return DEFAULT_REGISTRY.newAverageMeter(metricName, eventType);
+    public static AbsoluteMeter newAbsoluteMeter(MetricName metricName,
+                                                 String eventType) {
+        return DEFAULT_REGISTRY.newAbsoluteMeter(metricName, eventType);
     }
 
     /**
