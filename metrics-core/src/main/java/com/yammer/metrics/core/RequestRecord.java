@@ -3,14 +3,16 @@ package com.yammer.metrics.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A record of requests. Counts failed and successful requests and times them.
+ * A record of requests. Counts the failed and successful requests that have occurred during the last minute and times
+ * them.
  * <p>
  * Logs individual request metrics.
  */
-public class RequestRecord {
+public class RequestRecord implements Metric {
     private static final long SECONDS_IN_MINUTE = TimeUnit.MINUTES.toSeconds(1L);
     private static final long MILLIS_IN_SECOND = TimeUnit.SECONDS.toMillis(1L);
     private static final long TICK_INTERVAL = 1L; // 1 second
@@ -20,34 +22,38 @@ public class RequestRecord {
     private static final String CONCURRENT_TIMER = "concurrent_timer";
 
     private final Logger LOG = LoggerFactory.getLogger(this.getClass().getName());
+    private final Clock clock;
+    private final RollingRecord totalRequests;
+    private final RollingRecord servedRequests;
+    private final RollingRecord failedRequests;
+    private final RollingTimer concurrentTimer;
+    private final ThreadLocal<ReusableTimerContext> timerContext;
 
-    private Clock clock;
-    private MetricsRegistry metricsRegistry;
-    private RollingRecord totalRequests;
-    private RollingRecord servedRequests;
-    private RollingRecord failedRequests;
-    private RollingTimer concurrentTimer;
-    private ThreadLocal<ReusableTimerContext> timerContext;
     private long lastMinute;
 
-    public RequestRecord() {
-        clock = Clock.defaultClock();
-        metricsRegistry = new MetricsRegistry();
-        totalRequests = new RollingRecord(1L, TimeUnit.MINUTES);
-        servedRequests = new RollingRecord(1L, TimeUnit.MINUTES);
-        failedRequests = new RollingRecord(1L, TimeUnit.MINUTES);
-        concurrentTimer = metricsRegistry.getOrAdd(new MetricName(RollingTimer.class, CONCURRENT_TIMER),
-            new RollingTimer(CONCURRENT_TIMER, TimeUnit.MILLISECONDS, clock));
-        timerContext = new ThreadLocal<ReusableTimerContext>() {
+    /**
+     * Creates a nre request record object.
+     *
+     * @param tickThread background thread for updating the rates
+     * @param name       the record name
+     * @param clock      the clock used to calculate duration
+     */
+    RequestRecord(ScheduledExecutorService tickThread, String name, Clock clock) {
+        this.clock = Clock.defaultClock();
+        this.totalRequests = new RollingRecord(1L, TimeUnit.MINUTES);
+        this.servedRequests = new RollingRecord(1L, TimeUnit.MINUTES);
+        this.failedRequests = new RollingRecord(1L, TimeUnit.MINUTES);
+        this.concurrentTimer = new RollingTimer(CONCURRENT_TIMER, TimeUnit.MILLISECONDS, clock);
+        this.timerContext = new ThreadLocal<ReusableTimerContext>() {
                 @Override
                 protected ReusableTimerContext initialValue() {
-                    return new ReusableTimerContext(concurrentTimer, clock);
+                    return new ReusableTimerContext(concurrentTimer, RequestRecord.this.clock);
                 }
             };
-        lastMinute = 0L;
+        this.lastMinute = 0L;
 
         // schedule timer tick
-        metricsRegistry.newMeterTickThreadPool().scheduleAtFixedRate(new Runnable() {
+        tickThread.scheduleAtFixedRate(new Runnable() {
               @Override
               public void run() {
                   totalRequests.tick();
@@ -56,7 +62,7 @@ public class RequestRecord {
                   concurrentTimer.tick();
 
                   // log the metrics
-                  long ts = clock.getTime() / MILLIS_IN_SECOND;
+                  long ts = RequestRecord.this.clock.getTime() / MILLIS_IN_SECOND;
                   long thisMinute = ts / SECONDS_IN_MINUTE;
                   if (thisMinute > lastMinute) {
                       lastMinute = thisMinute;
@@ -74,12 +80,21 @@ public class RequestRecord {
     }
 
     /**
+     * Returns the internal timer's duration unit.
+     *
+     * @return this request record's duration unit
+     */
+    public TimeUnit getDurationUnit() {
+        return concurrentTimer.getDurationUnit();
+    }
+
+    /**
      * Starts a new request timer.
      *
      * @return the cock tick in nanoseconds
      */
     public long start() {
-        return timerContext.get().start();
+        return timerContext.get().start(); // updates concurrentTimer
     }
 
     /**
@@ -158,6 +173,12 @@ public class RequestRecord {
         return (totalRequests.getCount() == 0L) ? 0D : concurrentTimer.getOneMinuteRate() / totalRequests.getCount();
     }
 
+    @Override
+    public <T> void processWith(MetricProcessor<T> processor, MetricName name, T context) throws Exception {
+        processor.processRequestRecord(name, this, context);
+    }
+
+
     /**
      * A reusable {@link TimerContext}.
      */
@@ -167,7 +188,7 @@ public class RequestRecord {
         }
 
         /**
-         * Starts a the timer.
+         * Starts the timer.
          *
          * @return the cock tick in nanoseconds
          */

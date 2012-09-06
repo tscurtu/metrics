@@ -55,4 +55,14 @@ public interface MetricProcessor<T> {
      * @throws Exception if something goes wrong
      */
     void processGauge(MetricName name, Gauge<?> gauge, T context) throws Exception;
+
+    /**
+     * Process the given request record.
+     *
+     * @param name       the name of the gauge
+     * @param record     the request record
+     * @param context    the context of the meter
+     * @throws Exception if something goes wrong
+     */
+    void processRequestRecord(MetricName name, RequestRecord record, T context) throws Exception;
 }

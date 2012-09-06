@@ -446,6 +446,46 @@ public class MetricsRegistry {
     }
 
     /**
+     * Creates a new {@link RequestRecord} and registers it under the given class and name.
+     *
+     * @param klass        the class which owns the metric
+     * @param name         the name of the metric
+     * @return a new {@link RequestRecord}
+     */
+    public RequestRecord newRequestRecord(Class<?> klass,
+                                          String name) {
+        return newRequestRecord(createName(klass, name, null));
+    }
+
+    /**
+     * Creates a new {@link RequestRecord} and registers it under the given class, name, and scope.
+     *
+     * @param klass        the class which owns the metric
+     * @param name         the name of the metric
+     * @param scope        the scope of the metric
+     * @return a new {@link RequestRecord}
+     */
+    public RequestRecord newRequestRecord(Class<?> klass,
+                                          String name,
+                                          String scope) {
+        return newRequestRecord(createName(klass, name, scope));
+    }
+
+    /**
+     * Creates a new {@link RequestRecord} and registers it under the given metric name.
+     *
+     * @param metricName   the name of the metric
+     * @return a new {@link RequestRecord}
+     */
+    public RequestRecord newRequestRecord(MetricName metricName) {
+        final Metric existingMetric = metrics.get(metricName);
+        if (existingMetric != null) {
+            return (RequestRecord) existingMetric;
+        }
+        return getOrAdd(metricName, new RequestRecord(newMeterTickThreadPool(), metricName.getName(), clock));
+    }
+
+    /**
      * Returns an unmodifiable map of all metrics and their names.
      *
      * @return an unmodifiable map of all metrics and their names

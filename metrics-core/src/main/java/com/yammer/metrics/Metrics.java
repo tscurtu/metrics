@@ -459,6 +459,42 @@ public class Metrics {
     }
 
     /**
+     * Creates a new {@link RequestRecord} and registers it under the given class and name.
+     *
+     * @param klass        the class which owns the metric
+     * @param name         the name of the metric
+     * @return a new {@link RequestRecord}
+     */
+    public static RequestRecord newRequestRecord(Class<?> klass,
+                                                 String name) {
+        return DEFAULT_REGISTRY.newRequestRecord(klass, name);
+    }
+
+    /**
+     * Creates a new {@link RequestRecord} and registers it under the given class, name, and scope.
+     *
+     * @param klass        the class which owns the metric
+     * @param name         the name of the metric
+     * @param scope        the scope of the metric
+     * @return a new {@link RequestRecord}
+     */
+    public static RequestRecord newRequestRecord(Class<?> klass,
+                                                 String name,
+                                                 String scope) {
+        return DEFAULT_REGISTRY.newRequestRecord(klass, name, scope);
+    }
+
+    /**
+     * Creates a new {@link RequestRecord} and registers it under the given metric name.
+     *
+     * @param metricName   the name of the metric
+     * @return a new {@link RequestRecord}
+     */
+    public static RequestRecord newRequestRecord(MetricName metricName) {
+        return DEFAULT_REGISTRY.newRequestRecord(metricName);
+    }
+
+    /**
      * Returns the (static) default registry.
      *
      * @return the metrics registry
