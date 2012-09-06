@@ -61,16 +61,12 @@ public class RequestRecord {
                   if (thisMinute > lastMinute) {
                       lastMinute = thisMinute;
                       if (LOG.isInfoEnabled()) {
-                          LOG.info("{}.1m {} {}", new Object[] {TOTAL_REQUESTS, ts, totalRequests.getCount()});
-                          LOG.info("{}.1m {} {}", new Object[] {SERVED_REQUESTS, ts, servedRequests.getCount()});
-                          LOG.info("{}.1m {} {}", new Object[] {FAILED_REQUESTS, ts, failedRequests.getCount()});
-                          LOG.info("{}.total.1m {} {}", new Object[]
-                              {CONCURRENT_TIMER, ts, concurrentTimer.getOneMinuteRate()});
-                          LOG.info("{}.max.1m {} {}", new Object[]
-                              {CONCURRENT_TIMER, ts, concurrentTimer.getOneMinuteMax()});
-                          double avgTime = (totalRequests.getCount() == 0L) ?
-                              0D : concurrentTimer.getOneMinuteRate() / totalRequests.getCount();
-                          LOG.info("{}.avg.1m {} {}", new Object[] {CONCURRENT_TIMER, ts, avgTime});
+                          LOG.info("{}.1m {} {}", new Object[] {TOTAL_REQUESTS, ts, getLastMinuteTotalCount()});
+                          LOG.info("{}.1m {} {}", new Object[] {SERVED_REQUESTS, ts, getLastMinuteServedCount()});
+                          LOG.info("{}.1m {} {}", new Object[] {FAILED_REQUESTS, ts, getLastMinuteFailedCount()});
+                          LOG.info("{}.total.1m {} {}", new Object[] {CONCURRENT_TIMER, ts, getLastMinuteTotalTime()});
+                          LOG.info("{}.max.1m {} {}", new Object[] {CONCURRENT_TIMER, ts, getLastMinuteMaxTime()});
+                          LOG.info("{}.avg.1m {} {}", new Object[] {CONCURRENT_TIMER, ts, getLastMinuteAvgTime()});
                       }
                   }
               }
@@ -106,6 +102,60 @@ public class RequestRecord {
         failedRequests.inc();
         totalRequests.inc();
         return timerContext.get().stop(); // updates concurrentTimer
+    }
+
+    /**
+     * Returns the number of served requests in the last minute.
+     *
+     * @return the number of served requests in the last minute
+     */
+    public long getLastMinuteServedCount() {
+        return servedRequests.getCount();
+    }
+
+    /**
+     * Returns the number of failed requests in the last minute.
+     *
+     * @return the number of failed requests in the last minute
+     */
+    public long getLastMinuteFailedCount() {
+        return failedRequests.getCount();
+    }
+
+    /**
+     * Returns the number of total requests in the last minute.
+     *
+     * @return the number of total requests in the last minute
+     */
+    public long getLastMinuteTotalCount() {
+        return totalRequests.getCount();
+    }
+
+    /**
+     * Returns the total handling time in the last minute.
+     *
+     * @return the total handling time in the last minute
+     */
+    public double getLastMinuteTotalTime() {
+        return concurrentTimer.getOneMinuteRate();
+    }
+
+    /**
+     * Returns the maximum handling time in the last minute.
+     *
+     * @return the maximum handling time in the last minute
+     */
+    public double getLastMinuteMaxTime() {
+        return concurrentTimer.getOneMinuteMax();
+    }
+
+    /**
+     * Returns the average handling time in the last minute.
+     *
+     * @return the average handling time in the last minute
+     */
+    public double getLastMinuteAvgTime() {
+        return (totalRequests.getCount() == 0L) ? 0D : concurrentTimer.getOneMinuteRate() / totalRequests.getCount();
     }
 
     /**
