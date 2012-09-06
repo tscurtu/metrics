@@ -249,16 +249,29 @@ public class Metrics {
      * Creates a new {@link com.yammer.metrics.core.AbsoluteMeter} and registers it under the given
      * class and name.
      *
+     * @param klass the class which owns the metric
+     * @param name  the name of the metric
+     * @return a new {@link com.yammer.metrics.core.AbsoluteMeter}
+     */
+    public static AbsoluteMeter newAbsoluteMeter(Class<?> klass,
+                                                 String name) {
+      return DEFAULT_REGISTRY.newAbsoluteMeter(klass, name, name);
+    }
+
+    /**
+     * Creates a new {@link com.yammer.metrics.core.AbsoluteMeter} and registers it under the given
+     * class and name.
+     *
      * @param klass     the class which owns the metric
      * @param name      the name of the metric
      * @param eventType the plural name of the type of events the meter is measuring (e.g., {@code
      *                  "requests"})
      * @return a new {@link com.yammer.metrics.core.AbsoluteMeter}
      */
-    public static AbsoluteMeter newAverageMeter(Class<?> klass,
-                                                String name,
-                                                String eventType) {
-        return DEFAULT_REGISTRY.newAverageMeter(klass, name, eventType);
+    public static AbsoluteMeter newAbsoluteMeter(Class<?> klass,
+                                                 String name,
+                                                 String eventType) {
+        return DEFAULT_REGISTRY.newAbsoluteMeter(klass, name, eventType);
     }
 
     /**
@@ -272,11 +285,11 @@ public class Metrics {
      *                  "requests"})
      * @return a new {@link com.yammer.metrics.core.AbsoluteMeter}
      */
-    public static AbsoluteMeter newAverageMeter(Class<?> klass,
-                                                String name,
-                                                String scope,
-                                                String eventType) {
-        return DEFAULT_REGISTRY.newAverageMeter(klass, name, scope, eventType);
+    public static AbsoluteMeter newAbsoluteMeter(Class<?> klass,
+                                                 String name,
+                                                 String scope,
+                                                 String eventType) {
+        return DEFAULT_REGISTRY.newAbsoluteMeter(klass, name, scope, eventType);
     }
 
     /**
@@ -288,9 +301,9 @@ public class Metrics {
      *                   "requests"})
      * @return a new {@link com.yammer.metrics.core.AbsoluteMeter}
      */
-    public static AbsoluteMeter newAverageMeter(MetricName metricName,
-                                                String eventType) {
-        return DEFAULT_REGISTRY.newAverageMeter(metricName, eventType);
+    public static AbsoluteMeter newAbsoluteMeter(MetricName metricName,
+                                                 String eventType) {
+        return DEFAULT_REGISTRY.newAbsoluteMeter(metricName, eventType);
     }
 
     /**
@@ -443,6 +456,42 @@ public class Metrics {
     public static Timer newRollingTimer(MetricName metricName,
                                         TimeUnit durationUnit) {
         return DEFAULT_REGISTRY.newRollingTimer(metricName, durationUnit);
+    }
+
+    /**
+     * Creates a new {@link RequestRecord} and registers it under the given class and name.
+     *
+     * @param klass        the class which owns the metric
+     * @param name         the name of the metric
+     * @return a new {@link RequestRecord}
+     */
+    public static RequestRecord newRequestRecord(Class<?> klass,
+                                                 String name) {
+        return DEFAULT_REGISTRY.newRequestRecord(klass, name);
+    }
+
+    /**
+     * Creates a new {@link RequestRecord} and registers it under the given class, name, and scope.
+     *
+     * @param klass        the class which owns the metric
+     * @param name         the name of the metric
+     * @param scope        the scope of the metric
+     * @return a new {@link RequestRecord}
+     */
+    public static RequestRecord newRequestRecord(Class<?> klass,
+                                                 String name,
+                                                 String scope) {
+        return DEFAULT_REGISTRY.newRequestRecord(klass, name, scope);
+    }
+
+    /**
+     * Creates a new {@link RequestRecord} and registers it under the given metric name.
+     *
+     * @param metricName   the name of the metric
+     * @return a new {@link RequestRecord}
+     */
+    public static RequestRecord newRequestRecord(MetricName metricName) {
+        return DEFAULT_REGISTRY.newRequestRecord(metricName);
     }
 
     /**

@@ -5,47 +5,74 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * A counter that records the absolute number of events that have occurred in the last
- * specified time buckets.
+ * A counter that records the absolute number of events that have occurred in the last specified time buckets.
+ * <p>
+ * Can only be used with update granularities as small as seconds.
  */
 public class RollingRecord extends Counter {
-    private LinkedList<Long> eventBuckets;
+    private LinkedList<Long> totalBuckets;
+    private LinkedList<Long> maxBuckets;
     private AtomicLong total;
-    private long buckets;
+    private AtomicLong latestTotal;
+    private AtomicLong max;
+    private AtomicLong latestMax;
+    private long recordHistory;
 
     /**
      * Creates a new {@link RollingRecord}.
      *
-     * @param buckets    the buckets for which this counter will record events
-     * @param timeUnit    the time unit of the forementioned buckets
-     * @param secondsTick the update buckets in seconds
+     * @param recordHistory the number of time units in the past to store counted events
+     * @param timeUnit      the record history time unit
      */
-    RollingRecord(long buckets, TimeUnit timeUnit, long secondsTick) {
-        this.eventBuckets = new LinkedList<Long>();
-        this.total = new AtomicLong(0L);
-        this.buckets = timeUnit.toMillis(buckets) / secondsTick / 1000L;
-
-        if (this.buckets <= 0) {
-            throw new IllegalArgumentException("Invalid buckets-tick combination");
+    RollingRecord(long recordHistory, TimeUnit timeUnit) {
+        if (timeUnit.toSeconds(1L) <= 0L) {
+            throw new IllegalArgumentException("This record can't be used with history time units finer than seconds");
         }
+
+        this.totalBuckets = new LinkedList<Long>();
+        this.maxBuckets = new LinkedList<Long>();
+        this.total = new AtomicLong(0L);
+        this.latestTotal = new AtomicLong(0L);
+        this.max = new AtomicLong(0L);
+        this.latestMax = new AtomicLong(0L);
+        this.recordHistory = timeUnit.toSeconds(recordHistory);
     }
 
     public synchronized void tick() {
-        if (eventBuckets.size() + 1 >= buckets) {
-            total.addAndGet(-eventBuckets.removeLast());
+        // remove oldest bucket
+        if (totalBuckets.size() + 1L >= recordHistory) {
+            total.addAndGet(-totalBuckets.removeLast());
+            long lastBucket = maxBuckets.removeLast();
+            // the max value might change during the following operations
+            // that's why we have to recheck
+            long oldMax = max.get();
+            if (lastBucket >= oldMax) {
+                long newMax = latestMax.get();
+                for (long l : maxBuckets) {
+                    if (newMax < l) newMax = l;
+                }
+                max.compareAndSet(oldMax, newMax);
+            }
         }
-        eventBuckets.addFirst(count.getAndSet(0L));
-        total.addAndGet(eventBuckets.getFirst());
+        // push latest buckets into the lists and reset them
+        totalBuckets.addFirst(latestTotal.getAndSet(0L));
+        maxBuckets.addFirst(latestMax.getAndSet(0L));
+        total.addAndGet(totalBuckets.getFirst());
     }
 
     @Override
     public void inc(long n) {
-        count.addAndGet(n);
+        latestTotal.addAndGet(n);
+        while (max.get() < n) max.set(n);
+        while (latestMax.get() < n) latestMax.set(n);
     }
 
     @Override
     public void dec(long n) {
-        count.addAndGet(-n);
+        latestTotal.addAndGet(-n);
+        // foolproof! or is it?
+        while (max.get() < -n) max.set(-n);
+        while (latestMax.get() < -n) latestMax.set(-n);
     }
 
     @Override
@@ -53,10 +80,17 @@ public class RollingRecord extends Counter {
         return total.get();
     }
 
+    public long getMax() {
+        return max.get();
+    }
+
     @Override
     public synchronized void clear() {
-        count.set(0L);
         total.set(0L);
-        eventBuckets.clear();
+        latestTotal.set(0L);
+        max.set(0L);
+        latestMax.set(0L);
+        totalBuckets.clear();
+        maxBuckets.clear();
     }
 }

@@ -13,9 +13,16 @@ public class AbsoluteMeter extends Meter {
 
     AbsoluteMeter(ScheduledExecutorService tickThread, String eventType, Clock clock) {
         super(tickThread, eventType, TimeUnit.MINUTES,  clock);
-        this.am1Record = new RollingRecord(1, TimeUnit.MINUTES, INTERVAL);
-        this.am5Record = new RollingRecord(5, TimeUnit.MINUTES, INTERVAL);
-        this.am15Record = new RollingRecord(15, TimeUnit.MINUTES, INTERVAL);
+        this.am1Record = new RollingRecord(1, TimeUnit.MINUTES);
+        this.am5Record = new RollingRecord(5, TimeUnit.MINUTES);
+        this.am15Record = new RollingRecord(15, TimeUnit.MINUTES);
+    }
+
+    AbsoluteMeter(String eventType, Clock clock) {
+        super(eventType, TimeUnit.MINUTES,  clock);
+        this.am1Record = new RollingRecord(1, TimeUnit.MINUTES);
+        this.am5Record = new RollingRecord(5, TimeUnit.MINUTES);
+        this.am15Record = new RollingRecord(15, TimeUnit.MINUTES);
     }
 
     @Override
@@ -38,13 +45,25 @@ public class AbsoluteMeter extends Meter {
         return am15Record.getCount();
     }
 
+    public double getFifteenMinuteMax() {
+        return am15Record.getMax();
+    }
+
     @Override
     public double getFiveMinuteRate() {
         return am5Record.getCount();
     }
 
+    public double getFiveMinuteMax() {
+       return am5Record.getMax();
+    }
+
     @Override
     public double getOneMinuteRate() {
         return am1Record.getCount();
+    }
+
+    public double getOneMinuteMax() {
+        return am1Record.getMax();
     }
 }

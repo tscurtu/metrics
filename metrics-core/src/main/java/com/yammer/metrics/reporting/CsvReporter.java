@@ -232,6 +232,19 @@ public class CsvReporter extends AbstractPollingReporter implements
     }
 
     @Override
+    public void processRequestRecord(MetricName name, RequestRecord record, Context context) throws Exception {
+        final PrintStream stream =
+            context.getStream("# time,total_reqs,served_reqs,failed_reqs,total_time,max_time,avg_time");
+        stream.println(record.getLastMinuteTotalCount());
+        stream.println(record.getLastMinuteServedCount());
+        stream.println(record.getLastMinuteFailedCount());
+        stream.println(record.getLastMinuteTotalTime());
+        stream.println(record.getLastMinuteMaxTime());
+        stream.println(record.getLastMinuteAvgTime());
+        stream.flush();
+    }
+
+    @Override
     public void start(long period, TimeUnit unit) {
         this.startTime = clock.getTime();
         super.start(period, unit);

@@ -215,6 +215,17 @@ public class ConsoleReporter extends AbstractPollingReporter implements
         stream.printf(locale, "            99.9%% <= %2.2f%s\n", snapshot.get999thPercentile(), durationUnit);
     }
 
+    @Override
+    public void processRequestRecord(MetricName name, RequestRecord record, PrintStream stream) throws Exception {
+        final String durationUnit = abbrev(record.getDurationUnit());
+        stream.printf(locale, "    total requests = %7d\n", record.getLastMinuteTotalCount());
+        stream.printf(locale, "   served requests = %7d\n", record.getLastMinuteServedCount());
+        stream.printf(locale, "   failed requests = %7d\n", record.getLastMinuteFailedCount());
+        stream.printf(locale, "        total time = %6.2f%s\n", record.getLastMinuteTotalTime(), durationUnit);
+        stream.printf(locale, "          max time = %6.2f%s\n", record.getLastMinuteMaxTime(), durationUnit);
+        stream.printf(locale, "          avg time = %6.2f%s\n", record.getLastMinuteAvgTime(), durationUnit);
+    }
+
     private String abbrev(TimeUnit unit) {
         switch (unit) {
             case NANOSECONDS:
