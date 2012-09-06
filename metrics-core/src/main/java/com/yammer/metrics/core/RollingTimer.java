@@ -60,7 +60,7 @@ public class RollingTimer extends Timer {
     }
 
     public double getFifteenMinuteMax() {
-        return meter.getOneMinuteMax();
+        return meter.getFifteenMinuteMax();
     }
 
     @Override
@@ -69,7 +69,7 @@ public class RollingTimer extends Timer {
     }
 
     public double getFiveMinuteMax() {
-        return meter.getOneMinuteMax();
+        return meter.getFiveMinuteMax();
     }
 
     @Override
