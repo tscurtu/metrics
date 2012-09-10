@@ -5,7 +5,7 @@
     <groupId>com.yammer.metrics</groupId>
     <artifactId>metrics-core</artifactId>
     <name>Metrics Core Library</name>
-    <version>3.0.1</version>
+    <version>3.0.2</version>
     <packaging>jar</packaging>
     <description>
         Yammer's adjusted Metrics library.

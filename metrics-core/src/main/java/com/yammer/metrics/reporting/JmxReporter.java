@@ -255,6 +255,68 @@ public class JmxReporter extends AbstractReporter implements MetricsRegistryList
 
     // CHECKSTYLE:OFF
     @SuppressWarnings("UnusedDeclaration")
+    public interface RequestRecordMBean extends MetricMBean {
+        long getTotalCount();
+
+        long getServedCount();
+
+        long getFailedCount();
+
+        double getTotalTime();
+
+        double getMaxTime();
+
+        double getAvgTime();
+    }
+    // CHECKSTYLE:ON
+
+    private static class RequestRecord implements RequestRecordMBean {
+        private final ObjectName objectName;
+        private final com.yammer.metrics.core.RequestRecord metric;
+
+        private RequestRecord(com.yammer.metrics.core.RequestRecord metric, ObjectName objectName) {
+            this.metric = metric;
+            this.objectName = objectName;
+        }
+
+        @Override
+        public ObjectName objectName() {
+            return objectName;
+        }
+
+        @Override
+        public long getTotalCount() {
+            return metric.getLastMinuteTotalCount();
+        }
+
+        @Override
+        public long getServedCount() {
+            return metric.getLastMinuteServedCount();
+        }
+
+        @Override
+        public long getFailedCount() {
+            return metric.getLastMinuteFailedCount();
+        }
+
+        @Override
+        public double getTotalTime() {
+            return metric.getLastMinuteTotalTime();
+        }
+
+        @Override
+        public double getMaxTime() {
+            return metric.getLastMinuteMaxTime();
+        }
+
+        @Override
+        public double getAvgTime() {
+            return metric.getLastMinuteAvgTime();
+        }
+    }
+
+    // CHECKSTYLE:OFF
+    @SuppressWarnings("UnusedDeclaration")
     public interface TimerMBean extends MeterMBean, HistogramMBean {
         TimeUnit getLatencyUnit();
     }
@@ -436,6 +498,12 @@ public class JmxReporter extends AbstractReporter implements MetricsRegistryList
     @Override
     public void processGauge(MetricName name, com.yammer.metrics.core.Gauge<?> gauge, Context context) throws Exception {
         registerBean(context.getMetricName(), new Gauge(gauge, context.getObjectName()),
+                     context.getObjectName());
+    }
+
+    @Override
+    public void processRequestRecord(MetricName name, com.yammer.metrics.core.RequestRecord record, Context context) throws Exception {
+        registerBean(context.getMetricName(), new RequestRecord(record, context.getObjectName()),
                      context.getObjectName());
     }
 

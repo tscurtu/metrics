@@ -21,11 +21,27 @@ public class Meter implements Metered, Stoppable {
     private final EWMA m15Rate = EWMA.fifteenMinuteEWMA();
 
     protected final AtomicLong count = new AtomicLong();
-    private final long startTime;
-    private final TimeUnit rateUnit;
-    private final String eventType;
-    private final ScheduledFuture<?> future;
-    private final Clock clock;
+    protected final long startTime;
+    protected final TimeUnit rateUnit;
+    protected final String eventType;
+    protected final ScheduledFuture<?> future;
+    protected final Clock clock;
+
+    /**
+     * Creates a new {@link Meter}. Does not schedules itself.
+     *
+     * @param eventType  the plural name of the event the meter is measuring (e.g., {@code
+     *                   "requests"})
+     * @param rateUnit   the rate unit of the new meter
+     * @param clock      the clock to use for the meter ticks
+     */
+    Meter(String eventType, TimeUnit rateUnit, Clock clock) {
+        this.rateUnit = rateUnit;
+        this.eventType = eventType;
+        this.future = null;
+        this.clock = clock;
+        this.startTime = this.clock.getTick();
+    }
 
     /**
      * Creates a new {@link Meter}.
@@ -119,7 +135,9 @@ public class Meter implements Metered, Stoppable {
 
     @Override
     public void stop() {
-        future.cancel(false);
+        if (future != null) {
+            future.cancel(false);
+        }
     }
 
     @Override

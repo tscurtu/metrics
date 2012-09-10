@@ -249,10 +249,10 @@ public class MetricsRegistry {
      *                  "requests"})
      * @return a new {@link AbsoluteMeter}
      */
-    public AbsoluteMeter newAverageMeter(Class<?> klass,
+    public AbsoluteMeter newAbsoluteMeter(Class<?> klass,
                                          String name,
                                          String eventType) {
-        return newAverageMeter(klass, name, null, eventType);
+        return newAbsoluteMeter(klass, name, null, eventType);
     }
 
     /**
@@ -265,11 +265,11 @@ public class MetricsRegistry {
      *                  "requests"})
      * @return a new {@link AbsoluteMeter}
      */
-    public AbsoluteMeter newAverageMeter(Class<?> klass,
+    public AbsoluteMeter newAbsoluteMeter(Class<?> klass,
                                          String name,
                                          String scope,
                                          String eventType) {
-        return newAverageMeter(createName(klass, name, scope), eventType);
+        return newAbsoluteMeter(createName(klass, name, scope), eventType);
     }
 
     /**
@@ -280,7 +280,7 @@ public class MetricsRegistry {
      *                   "requests"})
      * @return a new {@link AbsoluteMeter}
      */
-    public AbsoluteMeter newAverageMeter(MetricName metricName,
+    public AbsoluteMeter newAbsoluteMeter(MetricName metricName,
                                          String eventType) {
         final Metric existingMetric = metrics.get(metricName);
         if (existingMetric != null) {
@@ -442,7 +442,47 @@ public class MetricsRegistry {
             return (RollingTimer) existingMetric;
         }
         return getOrAdd(metricName,
-                        new RollingTimer(newMeterTickThreadPool(), durationUnit, clock));
+                        new RollingTimer(newMeterTickThreadPool(), metricName.getName(), durationUnit, clock));
+    }
+
+    /**
+     * Creates a new {@link RequestRecord} and registers it under the given class and name.
+     *
+     * @param klass        the class which owns the metric
+     * @param name         the name of the metric
+     * @return a new {@link RequestRecord}
+     */
+    public RequestRecord newRequestRecord(Class<?> klass,
+                                          String name) {
+        return newRequestRecord(createName(klass, name, null));
+    }
+
+    /**
+     * Creates a new {@link RequestRecord} and registers it under the given class, name, and scope.
+     *
+     * @param klass        the class which owns the metric
+     * @param name         the name of the metric
+     * @param scope        the scope of the metric
+     * @return a new {@link RequestRecord}
+     */
+    public RequestRecord newRequestRecord(Class<?> klass,
+                                          String name,
+                                          String scope) {
+        return newRequestRecord(createName(klass, name, scope));
+    }
+
+    /**
+     * Creates a new {@link RequestRecord} and registers it under the given metric name.
+     *
+     * @param metricName   the name of the metric
+     * @return a new {@link RequestRecord}
+     */
+    public RequestRecord newRequestRecord(MetricName metricName) {
+        final Metric existingMetric = metrics.get(metricName);
+        if (existingMetric != null) {
+            return (RequestRecord) existingMetric;
+        }
+        return getOrAdd(metricName, new RequestRecord(newMeterTickThreadPool(), metricName.getName(), clock));
     }
 
     /**
@@ -607,7 +647,7 @@ public class MetricsRegistry {
      * @return either the existing metric or {@code metric}
      */
     @SuppressWarnings("unchecked")
-    protected final <T extends Metric> T getOrAdd(MetricName name, T metric) {
+    public final <T extends Metric> T getOrAdd(MetricName name, T metric) {
         final Metric existingMetric = metrics.get(name);
         if (existingMetric == null) {
             final Metric justAddedMetric = metrics.putIfAbsent(name, metric);
@@ -625,7 +665,7 @@ public class MetricsRegistry {
         return (T) existingMetric;
     }
 
-    private ScheduledExecutorService newMeterTickThreadPool() {
+    ScheduledExecutorService newMeterTickThreadPool() {
         return threadPools.newScheduledThreadPool(2, "meter-tick");
     }
 
